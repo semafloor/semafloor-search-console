@@ -1,0 +1,62 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="semafloor-console-theme.html">
+
+<link rel="import" href="../../bower_components/semafloor-search-page/semafloor-search-page.html">
+
+<link rel="import" href="../../bower_components/app-layout/app-layout.html">
+<link rel="import" href="../../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
+
+<link rel="import" href="../../bower_components/iron-icons/iron-icons.html">
+
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+
+<dom-module id="semafloor-console">
+  <template>
+    <style include="semafloor-console-theme"></style>
+
+    <app-drawer-layout>
+      <app-header-layout drawer>
+        <app-header>
+          <app-toolbar></app-toolbar>
+          <app-toolbar></app-toolbar>
+        </app-header>
+      </app-header-layout>
+
+      <app-header-layout main>
+        <app-header style="height: 192px;" condenses fixed effects="material" on-app-header-transform="_onAppHeaderTransform">
+          <app-toolbar id="topToolbar">
+            <paper-icon-button icon="menu"></paper-icon-button>
+            <div condensed-title>Title</div>
+          </app-toolbar>
+          <!-- <app-toolbar></app-toolbar> -->
+          <app-toolbar id="titleToolbar">
+            <div title>Title</div>
+          </app-toolbar>
+        </app-header>
+
+        <semafloor-search-page></semafloor-search-page>
+      </app-header-layout>
+    </app-drawer-layout>
+  </template>
+  <script>
+  (function() {
+    'use strict';
+
+    Polymer({
+      is: 'semafloor-console',
+
+      properties: {
+
+      },
+
+      _onAppHeaderTransform: function (ev) {
+          console.log('app-header-transform');
+          console.log(ev);
+          this.toggleClass('shrink-change-color', ev.detail.progress > 0.5, this.$.topToolbar);
+          this.toggleClass('shrink-change-color', ev.detail.progress > 0.5, this.$.titleToolbar);
+      },
+
+    });
+  })();
+  </script>
+</dom-module>

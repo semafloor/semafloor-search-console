@@ -8,7 +8,10 @@
     "platinum-elements": "PolymerElements/platinum-elements#^1.1.0",
     "neon-elements": "PolymerElements/neon-elements#^1.0.0",
     "page": "visionmedia/page.js#~1.6.3",
-    "semafloor-app-page": "semafloor/semafloor-app-page"
+    "semafloor-search-page": "semafloor/semafloor-search-page#~0.1.1",
+    "platinum-sw": "PolymerElements/platinum-sw#~1.2.3",
+    "app-layout": "PolymerLabs/app-layout#~0.0.6",
+    "paper-icon-button": "PolymerElements/paper-icon-button#~1.0.6"
   },
   "devDependencies": {
     "web-component-tester": "*",

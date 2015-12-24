@@ -1,0 +1,59 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<dom-module id="semafloor-console-theme">
+  <template>
+    <style>
+      :host {
+        display: block;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        -o-user-select: none;
+        user-select: none;
+
+        -webkit-box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        box-sizing: border-box;
+      }
+
+      *, *::before, *::after {
+        -webkit-box-sizing: inherit;
+        -moz-box-sizing: inherit;
+        box-sizing: inherit;
+      }
+
+      /*app-toolbar {
+        color: #fff;
+        background-color: #009688;
+      }*/
+      app-toolbar {
+        color: #fff;
+      }
+
+      app-toolbar.shrink-change-color {
+        color: #009688;
+      }
+
+      app-header {
+        --app-header-front-background: {
+          background-color: #009688;
+        };
+        --app-header-back-background: {
+          background-color: #fff;
+        };
+      }
+
+      [title] {
+        margin-left: 64px;
+        font-size: 32px;
+        font-weight: 300;
+      }
+
+      [condensed-title] {
+        margin-left: 32px;
+        font-weight: 300;
+      }
+
+    </style>
+  </template>
+</dom-module>
