@@ -51,7 +51,7 @@
   // More info: https://visionmedia.github.io/page.js/
   // Middleware
 
-  var blog = document.querySelector('semafloor-app-page');
+  var blog = document.querySelector('semafloor-console');
 
   /**
    * Utility function to listen to an event on a node once.
@@ -71,11 +71,10 @@
    */
   // page('/:category/list', function (ctx, next) {
   page('/:category/list', function(ctx) {
-    console.log(ctx);
+    // console.log(ctx);
     var category = ctx.params.category;
 
     function setData() {
-
       blog.category = category;
       blog.page = category;
       window.scrollTo(0, 0);

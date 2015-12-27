@@ -1,40 +1,89 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="semafloor-console-theme.html">
-
+<link rel="import" href="../semafloor-console-page/semafloor-console-page.html">
 <link rel="import" href="../../bower_components/semafloor-search-page/semafloor-search-page.html">
+
+<link rel="import" href="../../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../../bower_components/iron-selector/iron-selector.html">
+<link rel="import" href="../../bower_components/iron-pages/iron-pages.html">
+
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../../bower_components/paper-menu/paper-menu.html">
 
 <link rel="import" href="../../bower_components/app-layout/app-layout.html">
 <link rel="import" href="../../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
 
-<link rel="import" href="../../bower_components/iron-icons/iron-icons.html">
-
-<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
-
 <dom-module id="semafloor-console">
-  <template>
-    <style include="semafloor-console-theme"></style>
+  <template strip-whitespace>
+    <style is="custom-style" include="semafloor-console-theme"></style>
 
     <app-drawer-layout>
-      <app-header-layout drawer>
-        <app-header>
-          <app-toolbar></app-toolbar>
-          <app-toolbar></app-toolbar>
+      <app-header-layout drawer has-scrolling-region>
+        <app-header class="drawer-header">
+          <app-toolbar class="drawer-top-toolbar">
+            <div class="profile-pic">
+
+            </div>
+          </app-toolbar>
+          <app-toolbar class="drawer-bottom-toolbar">
+            <div class="profile-name">John Doe</div>
+            <div class="profile-email">johndoe@jmail.com</div>
+          </app-toolbar>
         </app-header>
+
+        <iron-selector class="nav-menu" selected="[[category]]" attr-for-selected="name">
+          <a name="home" href="/home/list">Home</a>
+          <a name="search" href="/search/list">Search</a>
+          <a name="console" href="/console/list">Console</a>
+        </iron-selector>
       </app-header-layout>
 
       <app-header-layout main>
-        <app-header style="height: 192px;" condenses fixed effects="material" on-app-header-transform="_onAppHeaderTransform">
+        <app-header class="main-header" condenses fixed effects="material" on-app-header-transform="_onAppHeaderTransform">
           <app-toolbar id="topToolbar">
-            <paper-icon-button icon="menu"></paper-icon-button>
-            <div condensed-title>Title</div>
+            <paper-icon-button icon="menu" drawer-toggle></paper-icon-button>
+            <div condensed-title>[[category]]</div>
+            <div class="flex"></div>
+            <paper-menu-button horizontal-align="right" horizontal-offset="8" vertical-offset="8">
+              <paper-icon-button icon="icons:more-vert" class="dropdown-trigger"></paper-icon-button>
+              <paper-menu class="dropdown-content" selected="{{view}}" attr-for-selected="view">
+                <paper-item view="day">Day View</paper-item>
+                <paper-item view="week">Week View</paper-item>
+                <paper-item view="month">Month View</paper-item>
+              </paper-menu>
+            </paper-menu-button>
           </app-toolbar>
-          <!-- <app-toolbar></app-toolbar> -->
-          <app-toolbar id="titleToolbar">
-            <div title>Title</div>
+          <app-toolbar id="titleToolbar" class="title-toolbar">
+            <div title>[[category]]</div>
           </app-toolbar>
         </app-header>
 
-        <semafloor-search-page></semafloor-search-page>
+        <iron-pages selected="[[category]]" attr-for-selected="name">
+          <div name="home">
+            <paper-card heading="Card Title">
+              <div class="card-content">
+                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Odit adipisci dignissimos dolore hic id laudantium repellendus saepe impedit, laborum quam. Dolorum magni quibusdam nihil animi praesentium laborum ipsum ut placeat, et aut unde nostrum beatae doloribus saepe, necessitatibus molestias repellendus amet eos debitis asperiores quisquam voluptatem. Commodi voluptas tenetur cumque.
+              </div>
+              <div class="card-actions">
+                <paper-button raised>Some action</paper-button>
+              </div>
+            </paper-card>
+
+            <paper-card heading="Card Title">
+              <div class="card-content">
+                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Odit adipisci dignissimos dolore hic id laudantium repellendus saepe impedit, laborum quam. Dolorum magni quibusdam nihil animi praesentium laborum ipsum ut placeat, et aut unde nostrum beatae doloribus saepe, necessitatibus molestias repellendus amet eos debitis asperiores quisquam voluptatem. Commodi voluptas tenetur cumque.
+              </div>
+              <div class="card-actions">
+                <paper-button raised>Some action</paper-button>
+              </div>
+            </paper-card>
+          </div>
+
+          <semafloor-search-page name="search"></semafloor-search-page>
+          <semafloor-console-page name="console" selected-view="[[view]]"></semafloor-console-page>
+        </iron-pages>
       </app-header-layout>
     </app-drawer-layout>
   </template>
@@ -46,14 +95,20 @@
       is: 'semafloor-console',
 
       properties: {
-
+        upgraded: Boolean,
+        category: String,
+        view: String,
       },
 
-      _onAppHeaderTransform: function (ev) {
-          console.log('app-header-transform');
-          console.log(ev);
-          this.toggleClass('shrink-change-color', ev.detail.progress > 0.5, this.$.topToolbar);
-          this.toggleClass('shrink-change-color', ev.detail.progress > 0.5, this.$.titleToolbar);
+      ready: function() {
+        console.log('semafloor-console-ready');
+        this.fire('upgraded');
+        this.upgraded = true;
+      },
+
+      _onAppHeaderTransform: function(ev) {
+        this.toggleClass('shrink-change-color', ev.detail.progress > 0.5, this.$.topToolbar);
+        this.toggleClass('shrink-change-color', ev.detail.progress > 0.5, this.$.titleToolbar);
       },
 
     });

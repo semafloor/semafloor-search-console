@@ -1,0 +1,112 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="semafloor-console-page-theme.html">
+
+<link rel="import" href="../../bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="../../bower_components/iron-list/iron-list.html">
+
+<dom-module id="semafloor-console-page">
+  <template strip-whitespace>
+    <style include="semafloor-console-page-theme"></style>
+
+    <iron-pages selected="[[selectedView]]" attr-for-selected="view">
+      <div view="day" class="day-view">
+        <iron-list items="[[_day]]">
+          <template strip-whitespace>
+            <div class="day-hour">
+              <div class="day-hour-label">[[item]]</div>
+              <div class="day-hour-content">
+              </div>
+            </div>
+          </template>
+        </iron-list>
+      </div>
+      <div view="week" class="week-view">
+        <div class="week-view-date">
+          <template is="dom-repeat" items="[[_week]]" index-as="index">
+            <div class="week-view-date-each">[[item]]</div>
+          </template>
+        </div>
+        <div class="week-view-date-hour">
+          <iron-list items="[[_day]]">
+            <template strip-whitespace>
+              <div class="day-hour-label">[[item]]</div>
+            </template>
+          </iron-list>
+          <iron-list items="[[_day]]">
+            <template strip-whitespace>
+              <div class="day-hour-label">[[item]]</div>
+            </template>
+          </iron-list>
+          <iron-list items="[[_day]]">
+            <template strip-whitespace>
+              <div class="day-hour-label">[[item]]</div>
+            </template>
+          </iron-list>
+          <iron-list items="[[_day]]">
+            <template strip-whitespace>
+              <div class="day-hour-label">[[item]]</div>
+            </template>
+          </iron-list>
+          <iron-list items="[[_day]]">
+            <template strip-whitespace>
+              <div class="day-hour-label">[[item]]</div>
+            </template>
+          </iron-list>
+          <iron-list items="[[_day]]">
+            <template strip-whitespace>
+              <div class="day-hour-label">[[item]]</div>
+            </template>
+          </iron-list>
+          <iron-list items="[[_day]]">
+            <template strip-whitespace>
+              <div class="day-hour-label">[[item]]</div>
+            </template>
+          </iron-list>
+          <iron-list items="[[_day]]">
+            <template strip-whitespace>
+              <div class="day-hour-label">[[item]]</div>
+            </template>
+          </iron-list>
+        </div>
+      </div>
+      <div view="month">
+        Month
+      </div>
+    </iron-pages>
+  </template>
+  <script>
+  (function() {
+    'use strict';
+
+    Polymer({
+      is: 'semafloor-console-page',
+
+      properties: {
+        selectedView: {
+          type: String,
+          value: 'week'
+        },
+        _day: {
+          type: Array,
+          value: function() {
+            return ['08:00', '08:30', '09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30', '13:00', '13:30', '14:00', '14:30', '15:00', '15:30', '16:00', '16:30', '17:00', '17:30', '18:00', '18:30', '19:00', '19:30', '20:00', '20:30', '21:00', '21:30', '22:00', '22:30', '23:00', '23:30'];
+          }
+        },
+        _week: {
+          type: Array,
+          value: function() {
+            var _now = new Date();
+            var _today = _now.getDate();
+            var _week = [' '];
+            for (var i = 0; i < 7; i++) {
+              _now = new Date();
+              _week.push(new Date(_now.setDate(_today + i)).getDate());
+            }
+            return _week;
+          }
+        },
+      }
+    });
+  })();
+  </script>
+</dom-module>

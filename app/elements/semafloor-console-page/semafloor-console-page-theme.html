@@ -1,0 +1,83 @@
+<dom-module id="semafloor-console-page-theme">
+  <template strip-whitespace>
+    <style>
+      :host {
+        display: block;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        -o-user-select: none;
+        user-select: none;
+
+        -webkit-box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        box-sizing: border-box;
+      }
+
+      *, *::before, *::after {
+        -webkit-box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        box-sizing: border-box;
+      }
+
+      /*day view*/
+      .day-view {
+        margin-top: 24px;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      iron-list {
+        overflow: hidden;
+      }
+      div.day-hour:last-child {
+        min-height: 128px;
+        padding-bottom: 64px;
+      }
+      .day-hour {
+        position: relative;
+        padding-left: 16px;
+        padding-bottom: 16px;
+        min-height: 64px;
+        width: 100%;
+        @apply(--layout-horizontal);
+      }
+      .day-hour-label {
+        width: 64px;
+        padding-top: 54px;
+        position: absolute;
+      }
+      .day-hour-content {
+        min-height: 64px;
+        margin-left: 64px;
+        border-bottom: 1px solid #ddd;
+        width: 100%;
+      }
+
+      /*week view*/
+      .week-view {
+        @apply(--layout-vertical);
+        @apply(--layout-flex-auto);
+      }
+      .week-view-date-hour > iron-list {
+        width: calc(100% / 8);
+      }
+      .week-view-date-hour > iron-list div.day-hour-label {
+        border-right: 1px solid #ddd;
+        border-bottom: 1px solid #ddd;
+      }
+      .week-view-date {
+        @apply(--layout-horizontal);
+        @apply(--layout-flex-auto);
+      }
+      .week-view-date-hour {
+        @apply(--layout-horizontal);
+        @apply(--layout-flex-auto);
+      }
+      .week-view-date div.week-view-date-each {
+        width: calc(100% / 8);
+        border-right: 1px solid #ddd;
+        border-bottom: 1px solid #ddd;
+      }
+    </style>
+  </template>
+</dom-module>
