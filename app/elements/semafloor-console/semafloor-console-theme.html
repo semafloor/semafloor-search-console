@@ -58,7 +58,8 @@
         font-size: 32px;
         font-weight: 300;
       }
-      [condensed-title] {
+      [condensed-title],
+      .console-title {
         margin-left:16px;
         font-weight: 300;
       }
@@ -86,6 +87,9 @@
         color: #fff;
       }
 
+      iron-pages {
+        /*margin-top: 64px;*/
+      }
       paper-card {
         margin-bottom: 16px;
       }
@@ -98,6 +102,10 @@
       }
       .flex {
         @apply(--layout-flex-auto);
+      }
+
+      .floor-tab {
+        width: calc(100% / 12);
       }
     </style>
   </template>

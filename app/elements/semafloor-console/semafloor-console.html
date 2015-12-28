@@ -42,9 +42,10 @@
 
       <app-header-layout main>
         <app-header class="main-header" condenses fixed effects="material" on-app-header-transform="_onAppHeaderTransform">
-          <app-toolbar id="topToolbar">
+          <app-toolbar id="topToolbar" class="main-top-toolbar">
             <paper-icon-button icon="menu" drawer-toggle></paper-icon-button>
-            <div condensed-title>[[category]]</div>
+            <div condensed-title hidden$="[[_isConsole(category)]]">[[category]]</div>
+            <div class="console-title" hidden$="[[!_isConsole(category)]]">[[category]]</div>
             <div class="flex"></div>
             <paper-menu-button horizontal-align="right" horizontal-offset="8" vertical-offset="8">
               <paper-icon-button icon="icons:more-vert" class="dropdown-trigger"></paper-icon-button>
@@ -55,8 +56,22 @@
               </paper-menu>
             </paper-menu-button>
           </app-toolbar>
-          <app-toolbar id="titleToolbar" class="title-toolbar">
+          <app-toolbar id="titleToolbar" class="title-toolbar" hidden$="[[_isConsole(category)]]">
             <div title>[[category]]</div>
+          </app-toolbar>
+          <app-toolbar class="main-middle-toolbar" hidden$="[[!_isConsole(category)]]">
+            <paper-tabs selected="{{site}}" bottom-item>
+              <paper-tab>KLB - Tower 5</paper-tab>
+              <paper-tab>KLB - Tower 2A</paper-tab>
+              <paper-tab>SUITE</paper-tab>
+            </paper-tabs>
+          </app-toolbar>
+          <app-toolbar class="main-bottom-toolbar" hidden$="[[!_isConsole(category)]]">
+            <paper-tabs id="floorTabs" selected="{{floor}}" bottom-item scrollable>
+              <template is="dom-repeat" items="[[_floors]]" index-as="index">
+                <paper-tab class="floor-tab">[[item]]</paper-tab>
+              </template>
+            </paper-tabs>
           </app-toolbar>
         </app-header>
 
@@ -98,7 +113,22 @@
         upgraded: Boolean,
         category: String,
         view: String,
+        site: {
+          type: String,
+          value: 0
+        },
+        floor: {
+          type: String,
+          value: 0
+        },
+        _floors: Array,
+        _prevFloor: String,
       },
+
+      observers: [
+        '_setFloor(site)',
+        '_setPrevFloor(floor)'
+      ],
 
       ready: function() {
         console.log('semafloor-console-ready');
@@ -109,6 +139,27 @@
       _onAppHeaderTransform: function(ev) {
         this.toggleClass('shrink-change-color', ev.detail.progress > 0.5, this.$.topToolbar);
         this.toggleClass('shrink-change-color', ev.detail.progress > 0.5, this.$.titleToolbar);
+      },
+
+      _isConsole: function(_category) {
+        return _category === 'console';
+      },
+
+      _setFloor: function(_site) {
+        this.set('_floors', [['1', '2', '3', '3A', '4', '5', '6',
+        '7', '8', '9', '10', '11', '12'], ['3'], ['1']][_site]);
+        if (_site === 0) {
+          this.set('floor', this._prevFloor);
+        }else {
+          this.set('floor', 0);
+        }
+        this.$.floorTabs.notifyResize();
+      },
+
+      _setPrevFloor: function(_floor) {
+        if (this.site === 0) {
+          this.set('_prevFloor', _floor);
+        }
       },
 
     });

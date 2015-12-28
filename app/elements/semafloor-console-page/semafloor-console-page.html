@@ -4,6 +4,8 @@
 <link rel="import" href="../../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../../bower_components/iron-list/iron-list.html">
 
+<link rel="import" href="../../bower_components/paper-tabs/paper-tabs.html">
+
 <dom-module id="semafloor-console-page">
   <template strip-whitespace>
     <style include="semafloor-console-page-theme"></style>
@@ -23,7 +25,10 @@
       <div view="week" class="week-view">
         <div class="week-view-date">
           <template is="dom-repeat" items="[[_week]]" index-as="index">
-            <div class="week-view-date-each">[[item]]</div>
+            <div class="week-view-date-each">
+              <span>[[item.date]]</span>
+              <span>[[_getDayName(item.dayIdx)]]</span>
+            </div>
           </template>
         </div>
         <div class="week-view-date-hour">
@@ -69,8 +74,21 @@
           </iron-list>
         </div>
       </div>
-      <div view="month">
-        Month
+      <div view="month" class="month-view">
+        <div class="month-view-weekday">
+          <template is="dom-repeat" items="[[_weekdayName]]" index-as="index">
+            <div class="month-view-weekday-day">
+              <span>[[item]]</span>
+            </div>
+          </template>
+        </div>
+        <div class="month-view-month">
+          <template is="dom-repeat" items="[[_month]]" index-as="index">
+            <div class="month-view-month-day">
+              <span>[[item]]</span>
+            </div>
+          </template>
+        </div>
       </div>
     </iron-pages>
   </template>
@@ -84,28 +102,73 @@
       properties: {
         selectedView: {
           type: String,
-          value: 'week'
+          value: 'month'
         },
         _day: {
           type: Array,
           value: function() {
-            return ['08:00', '08:30', '09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30', '13:00', '13:30', '14:00', '14:30', '15:00', '15:30', '16:00', '16:30', '17:00', '17:30', '18:00', '18:30', '19:00', '19:30', '20:00', '20:30', '21:00', '21:30', '22:00', '22:30', '23:00', '23:30'];
+            return [
+              '08:00', '08:30', '09:00', '09:30', '10:00', '10:30', '11:00',
+              '11:30', '12:00', '12:30', '13:00', '13:30', '14:00', '14:30',
+              '15:00', '15:30', '16:00', '16:30', '17:00', '17:30', '18:00',
+              '18:30', '19:00', '19:30', '20:00', '20:30', '21:00', '21:30',
+              '22:00', '22:30', '23:00', '23:30'];
           }
         },
         _week: {
           type: Array,
           value: function() {
             var _now = new Date();
-            var _today = _now.getDate();
             var _week = [' '];
+            var _offset = _now.getDate() - _now.getDay();
+            var _today;
             for (var i = 0; i < 7; i++) {
-              _now = new Date();
-              _week.push(new Date(_now.setDate(_today + i)).getDate());
+              _today = new Date(_now.setDate(_offset + i));
+              _week.push({
+                date: _today.getDate(),
+                dayIdx: _today.getDay()
+              });
             }
             return _week;
           }
         },
-      }
+        _month: {
+          type: Array,
+          value: function() {
+            function _computeTotalDays(_year, _month) {
+              var _total = 31;
+              if (_month === 1) {
+                _total = new Date(_year, 1, 29).getMonth() === 1 ? 29 : 28;
+              }else if (_month === 4 || _month === 6 || _month === 9 || _month === 11) {
+                _total = 30;
+              }
+              return _total;
+            }
+
+            var _now = new Date();
+            var _start = new Date(_now.getFullYear(), _now.getMonth(), 1).getDay();
+            var _month = [];
+            var _totalDays = _computeTotalDays(_now.getFullYear(), _now.getMonth() + 1);
+            for (var i = 0, j = 1 - _start; i < 42; i++) {
+              _month.push((i >= _start && i < _start + _totalDays ? j : ''));
+              j++;
+            }
+            return _month;
+          }
+        },
+        _weekdayName: {
+          teyp: Array,
+          value: function() {
+            return ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+          }
+        },
+
+      },
+
+      _getDayName: function(_dayIdx) {
+        return ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][_dayIdx];
+      },
+
     });
   })();
   </script>

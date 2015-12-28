@@ -58,6 +58,10 @@
         @apply(--layout-vertical);
         @apply(--layout-flex-auto);
       }
+      .week-view-date-hour {
+        @apply(--layout-horizontal);
+        @apply(--layout-flex-auto);
+      }
       .week-view-date-hour > iron-list {
         width: calc(100% / 8);
       }
@@ -66,17 +70,54 @@
         border-bottom: 1px solid #ddd;
       }
       .week-view-date {
-        @apply(--layout-horizontal);
-        @apply(--layout-flex-auto);
-      }
-      .week-view-date-hour {
+        min-height: 64px;
         @apply(--layout-horizontal);
         @apply(--layout-flex-auto);
       }
       .week-view-date div.week-view-date-each {
+        font-size: 12px;
         width: calc(100% / 8);
+        padding-left: 8px;
         border-right: 1px solid #ddd;
         border-bottom: 1px solid #ddd;
+        @apply(--layout-vertical);
+      }
+
+      /*month-view*/
+      .month-view {
+        @apply(--layout-vertical);
+      },
+      .month-view,
+      .month-view-weekday,
+      .month-view-month {
+        max-width: 360px;
+      }
+      .month-view-weekday,
+      .month-view-month {
+        @apply(--layout-horizontal);
+      }
+      .month-view-weekday-day,
+      .month-view-month-day {
+        font-size: 12px;
+        width: calc(100% / 7);
+      }
+      .month-view-weekday-day {
+        padding: 6px 0;
+      }
+      .month-view-month-day {
+        border-bottom: 1px solid #ddd;
+        min-height: 64px;
+        margin-bottom: 8px;
+      }
+      .month-view-month-day:nth-child(n + 6){
+        padding-right: 8px;
+      }
+      .month-view-month-day:nth-child(n + 7) {
+        padding-left: 8px;
+      }
+      .month-view-month {
+        @apply(--layout-horizontal);
+        @apply(--layout-wrap);
       }
     </style>
   </template>
