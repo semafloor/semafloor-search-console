@@ -10,6 +10,21 @@
   <template strip-whitespace>
     <style include="semafloor-console-page-theme"></style>
 
+    <paper-tabs selected="{{site}}">
+      <paper-tab>KLB - Tower 5</paper-tab>
+      <paper-tab>KLB - Tower 2A</paper-tab>
+      <paper-tab>SUITE</paper-tab>
+    </paper-tabs>
+    <paper-tabs id="floorTabs" selected="{{floor}}" scrollable>
+      <template is="dom-repeat" items="[[_floors]]" index-as="index" strip-whitespace>
+        <paper-tab class="floor-tab">[[item]]</paper-tab>
+      </template>
+    </paper-tabs>
+    <paper-tabs id="roomTabs" class="room-tabs" selected="{{room}}" scrollable>
+      <template is="dom-repeat" items="[[_rooms]]" index-as="index" strip-whitespace>
+        <paper-tab class="room-tab">[[item]]</paper-tab>
+      </template>
+    </paper-tabs>
     <iron-pages selected="[[selectedView]]" attr-for-selected="view">
       <div view="day" class="day-view">
         <iron-list items="[[_day]]">
@@ -24,68 +39,48 @@
       </div>
       <div view="week" class="week-view">
         <div class="week-view-date">
-          <template is="dom-repeat" items="[[_week]]" index-as="index">
+          <template is="dom-repeat" items="[[_week]]" index-as="index" strip-whitespace>
             <div class="week-view-date-each">
-              <span>[[item.date]]</span>
-              <span>[[_getDayName(item.dayIdx)]]</span>
+              <span class$="[[_isToday(item.today)]]">[[item.date]]</span>
+              <span class$="[[_isToday(item.today)]]">[[_getDayName(item.dayIdx)]]</span>
             </div>
           </template>
         </div>
         <div class="week-view-date-hour">
           <iron-list items="[[_day]]">
             <template strip-whitespace>
-              <div class="day-hour-label">[[item]]</div>
-            </template>
-          </iron-list>
-          <iron-list items="[[_day]]">
-            <template strip-whitespace>
-              <div class="day-hour-label">[[item]]</div>
-            </template>
-          </iron-list>
-          <iron-list items="[[_day]]">
-            <template strip-whitespace>
-              <div class="day-hour-label">[[item]]</div>
-            </template>
-          </iron-list>
-          <iron-list items="[[_day]]">
-            <template strip-whitespace>
-              <div class="day-hour-label">[[item]]</div>
-            </template>
-          </iron-list>
-          <iron-list items="[[_day]]">
-            <template strip-whitespace>
-              <div class="day-hour-label">[[item]]</div>
-            </template>
-          </iron-list>
-          <iron-list items="[[_day]]">
-            <template strip-whitespace>
-              <div class="day-hour-label">[[item]]</div>
-            </template>
-          </iron-list>
-          <iron-list items="[[_day]]">
-            <template strip-whitespace>
-              <div class="day-hour-label">[[item]]</div>
-            </template>
-          </iron-list>
-          <iron-list items="[[_day]]">
-            <template strip-whitespace>
-              <div class="day-hour-label">[[item]]</div>
+              <div class="week-view-day-hour">
+                <div class="">
+                  <span class="week-view-day-hour-label">[[item]]</span>
+                </div>
+
+                <div class="week-view-day-hour-row">
+                  <div class$="week-view-day-hour-item[[_isTodayCol(_todayIdx, 0)]]" day="sun">[[item]]</div>
+                  <div class$="week-view-day-hour-item[[_isTodayCol(_todayIdx, 1)]]" day="mon">[[item]]</div>
+                  <div class$="week-view-day-hour-item[[_isTodayCol(_todayIdx, 2)]]" day="tue">[[item]]</div>
+                  <div class$="week-view-day-hour-item[[_isTodayCol(_todayIdx, 3)]]" day="wed">[[item]]</div>
+
+                  <div class$="week-view-day-hour-item[[_isTodayCol(_todayIdx, 4)]]" day="thu">[[item]]</div>
+                  <div class$="week-view-day-hour-item[[_isTodayCol(_todayIdx, 5)]]" day="fri">[[item]]</div>
+                  <div class$="week-view-day-hour-item[[_isTodayCol(_todayIdx, 6)]]" day="sat">[[item]]</div>
+                </div>
+              </div>
             </template>
           </iron-list>
         </div>
       </div>
       <div view="month" class="month-view">
         <div class="month-view-weekday">
-          <template is="dom-repeat" items="[[_weekdayName]]" index-as="index">
+          <template is="dom-repeat" items="[[_weekdayName]]" index-as="index" strip-whitespace>
             <div class="month-view-weekday-day">
-              <span>[[item]]</span>
+              <span class$="[[_isTodayDay(_todayIdx, index)]]">[[item]]</span>
             </div>
           </template>
         </div>
         <div class="month-view-month">
-          <template is="dom-repeat" items="[[_month]]" index-as="index">
+          <template is="dom-repeat" items="[[_month]]" index-as="index" strip-whitespace>
             <div class="month-view-month-day">
-              <span>[[item]]</span>
+              <span class$="[[_isTodayMonth(_todayDate, item)]]">[[item]]</span>
             </div>
           </template>
         </div>
@@ -102,8 +97,25 @@
       properties: {
         selectedView: {
           type: String,
-          value: 'month'
+          value: 'week'
         },
+        site: {
+          type: Number,
+          value: 0
+        },
+        floor: {
+          type: Number,
+          value: 0
+        },
+        room: {
+          type: Number,
+          value: 0
+        },
+        _todayIdx: Number,
+        _todayDate: Number,
+        _floors: Array,
+        _rooms: Array,
+        _prevFloor: Number,
         _day: {
           type: Array,
           value: function() {
@@ -122,11 +134,22 @@
             var _week = [' '];
             var _offset = _now.getDate() - _now.getDay();
             var _today;
+            var _new;
+            var _isToday;
+            var _default = new Date(_now.getFullYear(), _now.getMonth(), _now.getDate());
             for (var i = 0; i < 7; i++) {
               _today = new Date(_now.setDate(_offset + i));
+              _new = new Date(_today.getFullYear(), _today.getMonth(), _today.getDate());
+              _isToday = _new.getTime() < _default.getTime() ? 'yesterday' :
+              _new.getTime() === _default.getTime() ? 'today' : 'tomorrow';
+              if (_isToday === 'today') {
+                this.set('_todayIdx', _new.getDay());
+                this.set('_todayDate', _new.getDate());
+              }
               _week.push({
                 date: _today.getDate(),
-                dayIdx: _today.getDay()
+                dayIdx: _today.getDay(),
+                today: _isToday
               });
             }
             return _week;
@@ -165,8 +188,97 @@
 
       },
 
+      observers: [
+        '_setFloor(site)',
+        '_setPrevFloor(floor)',
+        '_setRoom(site, floor)'
+      ],
+
       _getDayName: function(_dayIdx) {
         return ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][_dayIdx];
+      },
+
+      _setFloor: function(_site) {
+        this.set('_floors', [['1', '2', '3', '3A', '4', '5', '6',
+        '7', '8', '9', '10', '11', '12'], ['3'], ['1']][_site]);
+        if (_site === 0) {
+          this.set('floor', this._prevFloor);
+        }else {
+          this.set('floor', 0);
+        }
+        this.set('room', 0);
+        this.$.floorTabs.notifyResize();
+        this.$.roomTabs.notifyResize();
+      },
+
+      _setPrevFloor: function(_floor) {
+        if (this.site === 0) {
+          this.set('_prevFloor', _floor);
+        }
+        this.set('room', 0);
+        this.$.roomTabs.notifyResize();
+      },
+
+      _setRoom: function(_site, _floor) {
+        var _sitesCode = ['alpha', 'beta', 'gamma'][_site];
+        var _floorsCode = [
+          '01level', '02level', '03level', '04level', '05level', '06level',
+          '07level', '08level', '09level', '10level', '11level', '12level'
+        ][_floor];
+        var _rooms = {
+          'alpha': {
+            '01level': ['freedom tower', 'taipei 101', 'the shard', 'twin towers', 'willis tower'],
+            '02level': ['acetyls', 'aromatics', 'bitumen', 'hydrocarbon', 'lubricant', 'olefin'],
+            '03level': ['dowjones', 'euronext', 'ftse', 'hangseng', 'nikkei'],
+            '04level': ['austen', 'dickens', 'eliot', 'rowling', 'twain'],
+            '05level': ['daffodil', 'golden wattle', 'hibiscus', 'orchid', 'protea',
+            'raflesia', 'rose', 'tulip'],
+            '06level': ['courage', 'excellence', 'one team', 'respect', 'values'],
+            '07level': ['alpha', 'beta', 'delta', 'gamma', 'kappa', 'omega', 'sigma', 'zeta'],
+            '08level': ['angsana', 'cendana', 'chengal', 'jati', 'meranti', 'seraya', 'teak'],
+            '09level': [
+              'batu caves', 'batu ferringi', 'cherating', 'gunung ledang',
+              'jonker street', 'kinabalu', 'klcc', 'lake melati', 'limestone',
+              'minangkabau', 'putrajaya', 'silat', 'songket', 'wellness room'],
+            '10level': [
+              'degas', 'michaelangelo', 'monet', 'picasso',
+              'renoir', 'sisley', 'van gogh'],
+            '11level': [
+              'anise', 'cardamom', 'cinnamon', 'clove', 'peppercorn', 'sesame',
+              'tamarind', 'tumeric'],
+            '12level': [
+              'amethyst', 'diamond', 'emerald', 'garnet', 'pearl',
+              'sapphire', 'topaz', 'zircon']
+          },
+          'beta': {
+            '03level': [
+              'benz', 'edison', 'einstein', 'fleming', 'franklin', 'graham',
+              'newton', 'whitney']
+          },
+          'gamma': {
+            '01level': [
+              'collaborate', 'create', 'fun', 'grow', 'idea', 'innovate',
+              'inspire', 'lead', 'meet', 'team', 'think']
+          }
+        };
+        _floorsCode = _site > 1 ? '01level' : (_site > 0 ? '03level' : _floorsCode);
+        this.set('_rooms', _rooms[_sitesCode][_floorsCode]);
+      },
+
+      _isToday: function(_today) {
+        return _today ? _today : '';
+      },
+
+      _isTodayCol: function(_today, _compareIdx) {
+        return _today === _compareIdx ? ' is-today-col' : '';
+      },
+
+      _isTodayMonth: function(_todayDate, _item) {
+        return _todayDate === _item ? 'is-today-month' : '';
+      },
+
+      _isTodayDay: function(_todayDayIdx, _index) {
+        return _todayDayIdx === _index ? 'is-today-idx' : '';
       },
 
     });
