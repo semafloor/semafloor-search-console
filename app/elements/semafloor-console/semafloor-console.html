@@ -47,8 +47,9 @@
             <div condensed-title hidden$="[[_isConsole(category)]]">[[category]]</div>
             <div hidden$="[[!_isConsole(category)]]">[[category]]</div>
             <div class="flex"></div>
+            <paper-icon-button icon="icons:today" class="" hidden$="[[!_isConsole(category)]]" on-tap="_goToday"></paper-icon-button>
             <paper-menu-button horizontal-align="right" horizontal-offset="8" vertical-offset="8">
-              <paper-icon-button icon="icons:more-vert" class="dropdown-trigger"></paper-icon-button>
+              <paper-icon-button icon="icons:more-vert" class="dropdown-trigger" hidden$="[[!_isConsole(category)]]"></paper-icon-button>
               <paper-menu class="dropdown-content" selected="{{view}}" attr-for-selected="view">
                 <paper-item view="day">Day View</paper-item>
                 <paper-item view="week">Week View</paper-item>
@@ -85,7 +86,7 @@
           <!-- NO! 934 nodes -->
           <!-- <semafloor-search-page name="search"></semafloor-search-page> -->
           <!-- 479 nodes -->
-          <semafloor-console-page name="console" selected-view="[[view]]"></semafloor-console-page>
+          <semafloor-console-page id="consolePage" name="console" selected-view="[[view]]"></semafloor-console-page>
         </iron-pages>
       </app-header-layout>
     </app-drawer-layout>
@@ -119,6 +120,13 @@
         // workaround: to reset the position of topToolbar when switches to console page.
         this.transform('translate3d(0px, 0px, 0px)', this.$.topToolbar);
         return _category === 'console';
+      },
+
+      _goToday: function(ev) {
+        var _target = ev.target;
+        if (_target) {
+          this.$.consolePage.goToday();
+        }
       },
 
     });

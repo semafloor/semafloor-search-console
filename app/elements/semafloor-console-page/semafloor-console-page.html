@@ -41,14 +41,15 @@
         </template>
       </paper-tabs>
     </iron-collapse>
-    <iron-pages selected="[[selectedView]]" attr-for-selected="view">
+    <iron-pages id="viewPages" selected="[[selectedView]]" attr-for-selected="view"
+      class="view-pages">
       <!-- <div view="loading" class="loading-view">
         <paper-spinner-lite active></paper-spinner-lite>
       </div> -->
       <div view="day" class="day-view">
-        <div class="day-view-today">
-          <span>[[_todayDate]]</span>
-          <span>[[_getDayName(_todayIdx)]]</span>
+        <div class$="day-view-today[[_isTodayDay(_todayFulldate, _viewFulldate)]]">
+          <span>[[_getDate(_viewFulldate)]]</span>
+          <span>[[_getDayName(_viewFulldate)]]</span>
         </div>
         <iron-list items="[[_day]]">
           <template strip-whitespace>
@@ -64,8 +65,8 @@
         <div class="week-view-date">
           <template is="dom-repeat" items="[[_week]]" index-as="index" strip-whitespace>
             <div class="week-view-date-each">
-              <span class$="[[_isToday(item.today)]]">[[item.date]]</span>
-              <span class$="[[_isToday(item.today)]]">[[_getDayName(item.dayIdx)]]</span>
+              <span class$="[[_isToday(item.today)]]">[[_getDate(item.fulldate)]]</span>
+              <span class$="[[_isToday(item.today)]]">[[_getDayName(item.fulldate)]]</span>
             </div>
           </template>
         </div>
@@ -78,14 +79,14 @@
                 </div>
 
                 <div class="week-view-day-hour-row">
-                  <div class$="week-view-day-hour-item[[_isTodayCol(_todayIdx, 0)]]" day="sun">[[item]]</div>
-                  <div class$="week-view-day-hour-item[[_isTodayCol(_todayIdx, 1)]]" day="mon">[[item]]</div>
-                  <div class$="week-view-day-hour-item[[_isTodayCol(_todayIdx, 2)]]" day="tue">[[item]]</div>
-                  <div class$="week-view-day-hour-item[[_isTodayCol(_todayIdx, 3)]]" day="wed">[[item]]</div>
+                  <div class$="week-view-day-hour-item[[_isTodayCol(_hasToday, 0)]]" day="sun">[[item]]</div>
+                  <div class$="week-view-day-hour-item[[_isTodayCol(_hasToday, 1)]]" day="mon">[[item]]</div>
+                  <div class$="week-view-day-hour-item[[_isTodayCol(_hasToday, 2)]]" day="tue">[[item]]</div>
+                  <div class$="week-view-day-hour-item[[_isTodayCol(_hasToday, 3)]]" day="wed">[[item]]</div>
 
-                  <div class$="week-view-day-hour-item[[_isTodayCol(_todayIdx, 4)]]" day="thu">[[item]]</div>
-                  <div class$="week-view-day-hour-item[[_isTodayCol(_todayIdx, 5)]]" day="fri">[[item]]</div>
-                  <div class$="week-view-day-hour-item[[_isTodayCol(_todayIdx, 6)]]" day="sat">[[item]]</div>
+                  <div class$="week-view-day-hour-item[[_isTodayCol(_hasToday, 4)]]" day="thu">[[item]]</div>
+                  <div class$="week-view-day-hour-item[[_isTodayCol(_hasToday, 5)]]" day="fri">[[item]]</div>
+                  <div class$="week-view-day-hour-item[[_isTodayCol(_hasToday, 6)]]" day="sat">[[item]]</div>
                 </div>
               </div>
             </template>
@@ -96,14 +97,14 @@
         <div class="month-view-weekday">
           <template is="dom-repeat" items="[[_weekdayName]]" index-as="index" strip-whitespace>
             <div class="month-view-weekday-day">
-              <span class$="[[_isTodayDay(_todayIdx, index)]]">[[item]]</span>
+              <span class$="[[_isTodayDay(_todayFulldate, _viewFulldate, index)]]">[[item]]</span>
             </div>
           </template>
         </div>
         <div class="month-view-month">
           <template is="dom-repeat" items="[[_month]]" index-as="index" strip-whitespace>
             <div class="month-view-month-day">
-              <span class$="[[_isTodayMonth(_todayDate, item)]]">[[item]]</span>
+              <span class$="[[_isTodayMonth(_todayFulldate, _viewFulldate, item)]]">[[item]]</span>
             </div>
           </template>
         </div>
@@ -162,7 +163,7 @@
       properties: {
         selectedView: {
           type: String,
-          value: 'week'
+          value: 'day'
         },
         site: {
           type: Number,
@@ -181,8 +182,8 @@
           value: 'freedom tower'
         },
         _selectRoomOnTap: Boolean,
-        _todayIdx: Number,
-        _todayDate: Number,
+        _todayFulldate: Object,
+        _viewFulldate: Object,
         _floors: Array,
         _rooms: Array,
         _prevFloor: Number,
@@ -200,41 +201,49 @@
         _week: {
           type: Array,
           value: function() {
+            console.time('prop-week');
             var _now = new Date();
+            var _nowFullYear = _now.getFullYear();
+            var _nowMonth = _now.getMonth();
+            var _nowDate = _now.getDate();
             var _week = [' '];
-            var _offset = _now.getDate() - _now.getDay();
-            var _today;
             var _new;
             var _isToday;
-            var _default = new Date(_now.getFullYear(), _now.getMonth(), _now.getDate());
+            var _hasToday = 8;
+            var _default = new Date(_nowFullYear, _nowMonth, _nowDate);
+            var _offset = _default.getDate() - _default.getDay();
             for (var i = 0; i < 7; i++) {
-              _today = new Date(_now.setDate(_offset + i));
-              _new = new Date(_today.getFullYear(), _today.getMonth(), _today.getDate());
+              _new = new Date(_nowFullYear, _nowMonth, _offset + i);
               _isToday = _new.getTime() < _default.getTime() ? 'yesterday' :
               _new.getTime() === _default.getTime() ? 'today' : 'tomorrow';
               if (_isToday === 'today') {
-                this.set('_todayIdx', _new.getDay());
-                this.set('_todayDate', _new.getDate());
+                _hasToday = _new.getDay();
+                this.set('_todayFulldate', _new);
+                this.set('_viewFulldate', _new);
               }
               _week.push({
-                date: _today.getDate(),
-                dayIdx: _today.getDay(),
+                fulldate: _new,
                 today: _isToday
               });
             }
+            this.set('_hasToday', _hasToday);
+            console.timeEnd('prop-week');
             return _week;
           }
         },
         _month: {
           type: Array,
           value: function() {
+            console.time('prop-month');
             function _computeTotalDays(_year, _month) {
+              console.time('prop-month-compute-total-days');
               var _total = 31;
               if (_month === 1) {
                 _total = new Date(_year, 1, 29).getMonth() === 1 ? 29 : 28;
               }else if (_month === 4 || _month === 6 || _month === 9 || _month === 11) {
                 _total = 30;
               }
+              console.timeEnd('prop-month-compute-total-days');
               return _total;
             }
 
@@ -246,6 +255,7 @@
               _month.push((i >= _start && i < _start + _totalDays ? j : ''));
               j++;
             }
+            console.timeEnd('prop-month');
             return _month;
           }
         },
@@ -265,11 +275,19 @@
         '_selectRoom(room)'
       ],
 
-      _getDayName: function(_dayIdx) {
-        return ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][_dayIdx];
+      _getDate: function(_viewFulldate) {
+        if (_viewFulldate) {
+          return _viewFulldate.getDate();
+        }
+      },
+      _getDayName: function(_viewFulldate) {
+        if (_viewFulldate) {
+          return ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][_viewFulldate.getDay()];
+        }
       },
 
       _setFloor: function(_site) {
+        console.time('func-set-floor');
         this.set('_floors', [['1', '2', '3', '3A', '4', '5', '6',
         '7', '8', '9', '10', '11', '12'], ['3'], ['1']][_site]);
         if (_site === 0 && this._prevFloor) {
@@ -280,52 +298,63 @@
         this.set('room', 0);
         this.$.floorTabs.notifyResize();
         this.$.roomTabs.notifyResize();
+        console.timeEnd('func-set-floor');
       },
 
       _setPrevFloor: function(_floor) {
+        console.time('func-set-prev-floor');
         if (this.site === 0) {
           this.set('_prevFloor', _floor);
         }
         this.set('room', 0);
         this.$.roomTabs.notifyResize();
+        console.timeEnd('func-set-prev-floor');
       },
 
       _setRoom: function(_site, _floor) {
+        console.time('func-set-room');
         var _decodedSite = _sitesCode[_site];
         var _decodedFloor = _site > 1 ? '01level' :
         (_site > 0 ? '03level' : _floorsCode[_floor]);
         this.set('_rooms', _allrooms[_decodedSite][_decodedFloor]);
+        console.timeEnd('func-set-room');
       },
 
       _isToday: function(_today) {
         return _today ? _today : '';
       },
-      _isTodayCol: function(_today, _compareIdx) {
-        return _today === _compareIdx ? ' is-today-col' : '';
+      _isTodayCol: function(_hasToday, _compareIdx) {
+        return _hasToday === _compareIdx ? ' is-today-col' : '';
       },
       _isTodayMonth: function(_todayDate, _item) {
         return _todayDate === _item ? 'is-today-month' : '';
       },
-      _isTodayDay: function(_todayDayIdx, _index) {
-        return _todayDayIdx === _index ? 'is-today-idx' : '';
+      _isTodayDay: function(_todayFulldate, _viewFulldate) {
+        return _todayFulldate.getTime() > _viewFulldate.getTime() ? ' yesterday' :
+        _todayFulldate.getTime() === _viewFulldate.getTime() ? ' is-today-idx' : ' tomorrow';
       },
 
       _toggleCollapse: function() {
+        console.time('func-toggle-collapse');
         this.$.selectionCollapse.toggle();
         this.toggleClass('menu-drop-down-up', this.$.selectionCollapse.opened,
-        this.$.menuDropDown);
+          this.$.menuDropDown);
         // notifyResize once toggle.
         this.$.siteTabs.notifyResize();
         this.$.floorTabs.notifyResize();
         this.$.roomTabs.notifyResize();
+        console.timeEnd('func-toggle-collapse');
       },
       _onRoomSelect: function() {
+        console.time('func-on-room-select');
         this.set('_selectRoomOnTap', true);
         this.$.selectionCollapse.hide();
         this.toggleClass('menu-drop-down-up', this.$.selectionCollapse.opened,
         this.$.menuDropDown);
+        console.timeEnd('func-on-room-select');
       },
       _selectRoom: function(_room) {
+        console.time('func-select-room');
         if (this._selectRoomOnTap) {
           var _site = this.site;
           var _decodedSite = _sitesCode[_site];
@@ -335,14 +364,137 @@
           this.set('_selectedRoomName', _result[_room]);
         }
         this.set('_selectRoomOnTap', false);
+        console.timeEnd('func-select-room');
       },
 
       _prevDayWeekMonth: function(ev) {
+        console.time('func-prev-day-week-month');
         var _target = ev.target;
+        if (_target) {}
+        var _selectedView = this.selectedView;
+        var _newDate = this._viewFulldate;
+
+        if (_selectedView === 'day') {
+          // TODO: keep tracking the mutated date is still within the current week.
+          // TODO: keep tracking the mutated date is still within the current month.
+          var _newFulldate = new Date(_newDate.getFullYear(), _newDate.getMonth(),
+          _newDate.getDate() - 1);
+          this.set('_viewFulldate', _newFulldate);
+        }else if (_selectedView === 'week') {
+          var _lastDayOfCurrentWeek = this._week[1].fulldate;
+          var _firstDayOfNewWeek = new Date(_lastDayOfCurrentWeek.getFullYear(),
+          _lastDayOfCurrentWeek.getMonth(), _lastDayOfCurrentWeek.getDate() - 7);
+          this.set('_week', this._updateNewWeek(_firstDayOfNewWeek));
+        }else {
+          this.set('_month',
+            this._updateMonth(_newDate.getFullYear(), _newDate.getMonth() - 1));
+          // update _viewFulldate after each month changes.
+          // now I know why Google set it to 1 (first day of month).
+          this.set('_viewFulldate', new Date(_newDate.getFullYear(),
+            _newDate.getMonth() - 1, 1));
+        }
+        console.timeEnd('func-prev-day-week-month');
       },
 
       _nextDayWeekMonth: function(ev) {
+        console.time('func-next-day-week-month');
         var _target = ev.target;
+        if (_target) {}
+        var _selectedView = this.selectedView;
+        var _newDate = this._viewFulldate;
+        var _newFulldate = new Date(_newDate.getFullYear(), _newDate.getMonth(),
+          _newDate.getDate() + 1);
+
+        if (_selectedView === 'day') {
+          // TODO: keep tracking the mutated date is still within the current week.
+          // TODO: keep tracking the mutated date is still within the current month.
+          this.set('_viewFulldate', _newFulldate);
+        }else if (_selectedView === 'week') {
+          // TODO: keep tracking the mutated date is still within the current week.
+          // TODO: keep tracking the mutated date is still within the current month.
+          var _lastDayOfCurrentWeek = _.last(this._week).fulldate;
+          var _firstDayOfNewWeek = new Date(_lastDayOfCurrentWeek.getFullYear(),
+          _lastDayOfCurrentWeek.getMonth(), _lastDayOfCurrentWeek.getDate() + 1);
+          this.set('_week', this._updateNewWeek(_firstDayOfNewWeek));
+        }else {
+          // TODO: seems like day has been updated automatically due to being reset.
+          // TODO: update to display first week of month on week view.
+          this.set('_month',
+          this._updateMonth(_newDate.getFullYear(), _newDate.getMonth() + 1));
+          // update _viewFulldate after each month changes.
+          // now I know why Google set it to 1 (first day of month).
+          this.set('_viewFulldate', new Date(_newDate.getFullYear(),
+          _newDate.getMonth() + 1, 1));
+
+        }
+        console.timeEnd('func-next-day-week-month');
+      },
+
+      goToday: function() {
+        console.time('func-go-today');
+        var _today = new Date();
+        // reset day view.
+        this.set('_viewFulldate', new Date(_today.getFullYear(), _today.getMonth(),
+          _today.getDate()));
+        // reset month view.
+        var _viewFulldate = this._viewFulldate;
+        var _offset = _viewFulldate.getDate() - _viewFulldate.getDay();
+        this.set('_week', this._updateNewWeek(new Date(_viewFulldate.getFullYear(),
+          _viewFulldate.getMonth(), _offset)));
+        console.timeEnd('func-go-today');
+      },
+
+      _updateNewWeek: function(_firstDayOfNewWeek) {
+        var _week = [' '];
+        var _firstDate = _firstDayOfNewWeek.getDate();
+        var _firstMonth = _firstDayOfNewWeek.getMonth();
+        var _firstFullYear = _firstDayOfNewWeek.getFullYear();
+        var _today = new Date();
+        var _new;
+        var _isToday;
+        var _hasToday = 8;
+        _today = new Date(_today.getFullYear(), _today.getMonth(), _today.getDate());
+        for (var i = 0; i < 7; i++) {
+          _new = new Date(_firstFullYear, _firstMonth, _firstDate + i);
+          _isToday = _new.getTime() < _today.getTime() ? 'yesterday' :
+          _new.getTime() === _today.getTime() ? 'today' : 'tomorrow';
+          if (_isToday === 'today') {
+            _hasToday = _new.getDay();
+            this.set('_todayFulldate', _new);
+            this.set('_viewFulldate', _new);
+          }
+          _week.push({
+            fulldate: _new,
+            today: _isToday
+          });
+        }
+        this.set('_hasToday', _hasToday);
+        return _week;
+      },
+
+      _updateMonth: function(_fullyear, _month) {
+        console.time('func-update-month');
+        function _computeTotalDays(_fullyear, _month) {
+          console.time('func-update-month-compute-total-days');
+          var _total = 31;
+          if (_month === 1) {
+            _total = new Date(_fullyear, 1, 29).getMonth() === 1 ? 29 : 28;
+          }else if (_month === 4 || _month === 6 || _month === 9 || _month === 11) {
+            _total = 30;
+          }
+          console.timeEnd('func-update-month-compute-total-days');
+          return _total;
+        }
+
+        var _start = new Date(_fullyear, _month, 1).getDay();
+        var _newMonth = [];
+        var _totalDays = _computeTotalDays(_fullyear, _month + 1);
+        for (var i = 0, j = 1 - _start; i < 42; i++) {
+          _newMonth.push((i >= _start && i < _start + _totalDays ? j : ''));
+          j++;
+        }
+        console.timeEnd('func-update-month');
+        return _newMonth;
       },
 
     });

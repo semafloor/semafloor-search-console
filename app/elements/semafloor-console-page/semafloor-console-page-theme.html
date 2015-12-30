@@ -38,6 +38,7 @@
         @apply(--layout-center);
       }
       .menu-drop-down {
+        will-change: transform;
         -webkit-transition: transform .4s;
         transition: transform .4s;
       }
@@ -87,6 +88,7 @@
       }
       .day-view-today {
         height: 72px;
+        color: #9e9e9e;
         padding-left: 16px;
         border-bottom: 1px solid #ddd;
         @apply(--layout-vertical);
@@ -143,12 +145,13 @@
         border-bottom: 1px solid #ddd;
         @apply(--layout-vertical);
       }
-      .day-view-today,
+      .day-view-today.is-today-idx,
       .week-view-date-each > .today,
       .month-view-weekday-day > span.is-today-idx {
         color: #2196F3;
         font-weight: 500;
       }
+      .day-view-today.tomorrow,
       .week-view-date-each > .tomorrow {
         color: #000;
       }
