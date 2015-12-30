@@ -20,6 +20,31 @@
         box-sizing: border-box;
       }
 
+      /* selection menu */
+      .selection-menu {
+        margin: 0 24px;
+        height: 64px;
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+      }
+      .selection-menu > paper-button {
+        height: 64px;
+        font-size: 20px;
+        -webkit-tap-highlight-color: rgba(0,0,0,0);
+        -webkit-tap-highlight-color: transparent;
+        @apply(--layout-horizontal);
+        @apply(--layout-flex-auto);
+        @apply(--layout-center);
+      }
+      .menu-drop-down {
+        -webkit-transition: transform .4s;
+        transition: transform .4s;
+      }
+      .menu-drop-down-up {
+        -webkit-transform: rotateZ(180deg);
+        transform: rotateZ(180deg);
+      }
+
       /* tabs */
       paper-tabs {
         background-color: #fff;
@@ -49,7 +74,7 @@
       .day-view,
       .week-view,
       .month-view {
-        max-height: calc(100vh - 64px - 48px - 48px - 48px - 8px); /* to make page scrollable */
+        max-height: calc(100vh - 64px - 8px); /* to make page scrollable */
         color: #212121;
       }
 
@@ -199,11 +224,15 @@
       }
       .month-view-month {
         /* to make calendar scrollable */
-        height: calc(100vh - 48px - 48px - 48px - 29px - 8px);
+        height: calc(100vh - 29px - 8px);
         overflow-y: auto;
         /* normal styling */
         @apply(--layout-horizontal);
         @apply(--layout-wrap);
+      }
+
+      .flex {
+        @apply(--layout-flex-auto);
       }
     </style>
   </template>

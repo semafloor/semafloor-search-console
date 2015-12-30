@@ -1,31 +1,50 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="semafloor-console-page-theme.html">
 
+<link rel="import" href="../../bower_components/iron-collapse/iron-collapse.html">
 <link rel="import" href="../../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../../bower_components/iron-list/iron-list.html">
+<link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../../bower_components/iron-icons/iron-icons.html">
 
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../../bower_components/paper-tabs/paper-tabs.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/paper-spinner/paper-spinner-lite.html">
 
 <dom-module id="semafloor-console-page">
   <template strip-whitespace>
     <style include="semafloor-console-page-theme"></style>
 
-    <paper-tabs selected="{{site}}">
-      <paper-tab>KLB - Tower 5</paper-tab>
-      <paper-tab>KLB - Tower 2A</paper-tab>
-      <paper-tab>SUITE</paper-tab>
-    </paper-tabs>
-    <paper-tabs id="floorTabs" selected="{{floor}}" scrollable>
-      <template is="dom-repeat" items="[[_floors]]" index-as="index" strip-whitespace>
-        <paper-tab class="floor-tab">[[item]]</paper-tab>
-      </template>
-    </paper-tabs>
-    <paper-tabs id="roomTabs" class="room-tabs" selected="{{room}}" scrollable>
-      <template is="dom-repeat" items="[[_rooms]]" index-as="index" strip-whitespace>
-        <paper-tab class="room-tab">[[item]]</paper-tab>
-      </template>
-    </paper-tabs>
+    <div class="selection-menu">
+      <paper-icon-button icon="icons:chevron-left" on-tap="_prevDayWeekMonth"></paper-icon-button>
+      <paper-button class="" on-tap="_toggleCollapse">
+        <span>[[_selectedRoomName]]</span>
+        <iron-icon id="menuDropDown" class="menu-drop-down" icon="icons:arrow-drop-down"></iron-icon>
+      </paper-button>
+      <paper-icon-button icon="icons:chevron-right" on-tap="_nextDayWeekMonth"></paper-icon-button>
+    </div>
+    <iron-collapse id="selectionCollapse">
+      <paper-tabs id="siteTabs" selected="{{site}}">
+        <paper-tab>KLB - Tower 5</paper-tab>
+        <paper-tab>KLB - Tower 2A</paper-tab>
+        <paper-tab>SUITE</paper-tab>
+      </paper-tabs>
+      <paper-tabs id="floorTabs" selected="{{floor}}" scrollable>
+        <template is="dom-repeat" items="[[_floors]]" index-as="index" strip-whitespace>
+          <paper-tab class="floor-tab">[[item]]</paper-tab>
+        </template>
+      </paper-tabs>
+      <paper-tabs id="roomTabs" class="room-tabs" selected="{{room}}" scrollable on-tap="_onRoomSelect">
+        <template is="dom-repeat" items="[[_rooms]]" index-as="index" strip-whitespace>
+          <paper-tab class="room-tab">[[item]]</paper-tab>
+        </template>
+      </paper-tabs>
+    </iron-collapse>
     <iron-pages selected="[[selectedView]]" attr-for-selected="view">
+      <!-- <div view="loading" class="loading-view">
+        <paper-spinner-lite active></paper-spinner-lite>
+      </div> -->
       <div view="day" class="day-view">
         <iron-list items="[[_day]]">
           <template strip-whitespace>
@@ -91,6 +110,48 @@
   (function() {
     'use strict';
 
+    var _sitesCode = ['alpha', 'beta', 'gamma'];
+    var _floorsCode = [
+      '01level', '02level', '03level', '04level', '05level', '06level',
+      '07level', '08level', '09level', '10level', '11level', '12level'
+    ];
+    var _allrooms = {
+      'alpha': {
+        '01level': ['freedom tower', 'taipei 101', 'the shard', 'twin towers', 'willis tower'],
+        '02level': ['acetyls', 'aromatics', 'bitumen', 'hydrocarbon', 'lubricant', 'olefin'],
+        '03level': ['dowjones', 'euronext', 'ftse', 'hangseng', 'nikkei'],
+        '04level': ['austen', 'dickens', 'eliot', 'rowling', 'twain'],
+        '05level': ['daffodil', 'golden wattle', 'hibiscus', 'orchid', 'protea',
+        'raflesia', 'rose', 'tulip'],
+        '06level': ['courage', 'excellence', 'one team', 'respect', 'values'],
+        '07level': ['alpha', 'beta', 'delta', 'gamma', 'kappa', 'omega', 'sigma', 'zeta'],
+        '08level': ['angsana', 'cendana', 'chengal', 'jati', 'meranti', 'seraya', 'teak'],
+        '09level': [
+          'batu caves', 'batu ferringi', 'cherating', 'gunung ledang',
+          'jonker street', 'kinabalu', 'klcc', 'lake melati', 'limestone',
+          'minangkabau', 'putrajaya', 'silat', 'songket', 'wellness room'],
+        '10level': [
+          'degas', 'michaelangelo', 'monet', 'picasso',
+          'renoir', 'sisley', 'van gogh'],
+        '11level': [
+          'anise', 'cardamom', 'cinnamon', 'clove', 'peppercorn', 'sesame',
+          'tamarind', 'tumeric'],
+        '12level': [
+          'amethyst', 'diamond', 'emerald', 'garnet', 'pearl',
+          'sapphire', 'topaz', 'zircon']
+      },
+      'beta': {
+        '03level': [
+          'benz', 'edison', 'einstein', 'fleming', 'franklin', 'graham',
+          'newton', 'whitney']
+      },
+      'gamma': {
+        '01level': [
+          'collaborate', 'create', 'fun', 'grow', 'idea', 'innovate',
+          'inspire', 'lead', 'meet', 'team', 'think']
+      }
+    };
+
     Polymer({
       is: 'semafloor-console-page',
 
@@ -111,6 +172,11 @@
           type: Number,
           value: 0
         },
+        _selectedRoomName: {
+          type: String,
+          value: 'freedom tower'
+        },
+        _selectRoomOnTap: Boolean,
         _todayIdx: Number,
         _todayDate: Number,
         _floors: Array,
@@ -191,7 +257,8 @@
       observers: [
         '_setFloor(site)',
         '_setPrevFloor(floor)',
-        '_setRoom(site, floor)'
+        '_setRoom(site, floor)',
+        '_selectRoom(room)'
       ],
 
       _getDayName: function(_dayIdx) {
@@ -199,11 +266,13 @@
       },
 
       _setFloor: function(_site) {
+        console.log(_site);
         this.set('_floors', [['1', '2', '3', '3A', '4', '5', '6',
         '7', '8', '9', '10', '11', '12'], ['3'], ['1']][_site]);
-        if (_site === 0) {
+        if (_site === 0 && this._prevFloor) {
           this.set('floor', this._prevFloor);
         }else {
+          console.log('set-floor');
           this.set('floor', 0);
         }
         this.set('room', 0);
@@ -220,65 +289,59 @@
       },
 
       _setRoom: function(_site, _floor) {
-        var _sitesCode = ['alpha', 'beta', 'gamma'][_site];
-        var _floorsCode = [
-          '01level', '02level', '03level', '04level', '05level', '06level',
-          '07level', '08level', '09level', '10level', '11level', '12level'
-        ][_floor];
-        var _rooms = {
-          'alpha': {
-            '01level': ['freedom tower', 'taipei 101', 'the shard', 'twin towers', 'willis tower'],
-            '02level': ['acetyls', 'aromatics', 'bitumen', 'hydrocarbon', 'lubricant', 'olefin'],
-            '03level': ['dowjones', 'euronext', 'ftse', 'hangseng', 'nikkei'],
-            '04level': ['austen', 'dickens', 'eliot', 'rowling', 'twain'],
-            '05level': ['daffodil', 'golden wattle', 'hibiscus', 'orchid', 'protea',
-            'raflesia', 'rose', 'tulip'],
-            '06level': ['courage', 'excellence', 'one team', 'respect', 'values'],
-            '07level': ['alpha', 'beta', 'delta', 'gamma', 'kappa', 'omega', 'sigma', 'zeta'],
-            '08level': ['angsana', 'cendana', 'chengal', 'jati', 'meranti', 'seraya', 'teak'],
-            '09level': [
-              'batu caves', 'batu ferringi', 'cherating', 'gunung ledang',
-              'jonker street', 'kinabalu', 'klcc', 'lake melati', 'limestone',
-              'minangkabau', 'putrajaya', 'silat', 'songket', 'wellness room'],
-            '10level': [
-              'degas', 'michaelangelo', 'monet', 'picasso',
-              'renoir', 'sisley', 'van gogh'],
-            '11level': [
-              'anise', 'cardamom', 'cinnamon', 'clove', 'peppercorn', 'sesame',
-              'tamarind', 'tumeric'],
-            '12level': [
-              'amethyst', 'diamond', 'emerald', 'garnet', 'pearl',
-              'sapphire', 'topaz', 'zircon']
-          },
-          'beta': {
-            '03level': [
-              'benz', 'edison', 'einstein', 'fleming', 'franklin', 'graham',
-              'newton', 'whitney']
-          },
-          'gamma': {
-            '01level': [
-              'collaborate', 'create', 'fun', 'grow', 'idea', 'innovate',
-              'inspire', 'lead', 'meet', 'team', 'think']
-          }
-        };
-        _floorsCode = _site > 1 ? '01level' : (_site > 0 ? '03level' : _floorsCode);
-        this.set('_rooms', _rooms[_sitesCode][_floorsCode]);
+        var _decodedSite = _sitesCode[_site];
+        var _decodedFloor = _site > 1 ? '01level' :
+        (_site > 0 ? '03level' : _floorsCode[_floor]);
+        this.set('_rooms', _allrooms[_decodedSite][_decodedFloor]);
       },
 
       _isToday: function(_today) {
         return _today ? _today : '';
       },
-
       _isTodayCol: function(_today, _compareIdx) {
         return _today === _compareIdx ? ' is-today-col' : '';
       },
-
       _isTodayMonth: function(_todayDate, _item) {
         return _todayDate === _item ? 'is-today-month' : '';
       },
-
       _isTodayDay: function(_todayDayIdx, _index) {
         return _todayDayIdx === _index ? 'is-today-idx' : '';
+      },
+
+      _toggleCollapse: function() {
+        this.$.selectionCollapse.toggle();
+        this.toggleClass('menu-drop-down-up', this.$.selectionCollapse.opened,
+        this.$.menuDropDown);
+
+        this.$.siteTabs.notifyResize();
+        this.$.floorTabs.notifyResize();
+        this.$.roomTabs.notifyResize();
+      },
+      _onRoomSelect: function() {
+        console.log('on-room-select');
+        this.set('_selectRoomOnTap', true);
+        this.$.selectionCollapse.hide();
+        this.toggleClass('menu-drop-down-up', this.$.selectionCollapse.opened,
+        this.$.menuDropDown);
+      },
+      _selectRoom: function(_room) {
+        if (this._selectRoomOnTap) {
+          var _site = this.site;
+          var _decodedSite = _sitesCode[_site];
+          var _decodedFloor = _site > 1 ? '01level' :
+          (_site > 0 ? '03level' : _floorsCode[this.floor]);
+          var _result = _allrooms[_decodedSite][_decodedFloor];
+          this.set('_selectedRoomName', _result[_room]);
+        }
+        this.set('_selectRoomOnTap', false);
+      },
+
+      _prevDayWeekMonth: function(ev) {
+        var _target = ev.target;
+      },
+
+      _nextDayWeekMonth: function(ev) {
+        var _target = ev.target;
       },
 
     });
