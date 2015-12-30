@@ -270,13 +270,11 @@
       },
 
       _setFloor: function(_site) {
-        console.log(_site);
         this.set('_floors', [['1', '2', '3', '3A', '4', '5', '6',
         '7', '8', '9', '10', '11', '12'], ['3'], ['1']][_site]);
         if (_site === 0 && this._prevFloor) {
           this.set('floor', this._prevFloor);
         }else {
-          console.log('set-floor');
           this.set('floor', 0);
         }
         this.set('room', 0);
@@ -316,13 +314,12 @@
         this.$.selectionCollapse.toggle();
         this.toggleClass('menu-drop-down-up', this.$.selectionCollapse.opened,
         this.$.menuDropDown);
-
+        // notifyResize once toggle.
         this.$.siteTabs.notifyResize();
         this.$.floorTabs.notifyResize();
         this.$.roomTabs.notifyResize();
       },
       _onRoomSelect: function() {
-        console.log('on-room-select');
         this.set('_selectRoomOnTap', true);
         this.$.selectionCollapse.hide();
         this.toggleClass('menu-drop-down-up', this.$.selectionCollapse.opened,
