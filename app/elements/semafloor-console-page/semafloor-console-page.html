@@ -46,6 +46,10 @@
         <paper-spinner-lite active></paper-spinner-lite>
       </div> -->
       <div view="day" class="day-view">
+        <div class="day-view-today">
+          <span>[[_todayDate]]</span>
+          <span>[[_getDayName(_todayIdx)]]</span>
+        </div>
         <iron-list items="[[_day]]">
           <template strip-whitespace>
             <div class="day-hour">

@@ -22,10 +22,11 @@
 
       /* selection menu */
       .selection-menu {
-        margin: 0 24px;
+        padding: 0 24px;
         height: 64px;
         @apply(--layout-horizontal);
         @apply(--layout-center);
+        box-shadow: 0px 5px 6px -3px rgba(0, 0, 0, 0.4);
       }
       .selection-menu > paper-button {
         height: 64px;
@@ -74,7 +75,8 @@
       .day-view,
       .week-view,
       .month-view {
-        max-height: calc(100vh - 64px - 8px); /* to make page scrollable */
+        margin-top: 8px;
+        max-height: calc(100vh - 64px - 64px - 8px); /* to make page scrollable */
         color: #212121;
       }
 
@@ -83,12 +85,22 @@
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
       }
-      .day-view > iron-list {
-        margin-top: 24px;
+      .day-view-today {
+        height: 72px;
+        padding-left: 16px;
+        border-bottom: 1px solid #ddd;
+        @apply(--layout-vertical);
       }
-      div.day-hour:last-child {
-        min-height: 128px;
-        padding-bottom: 64px;
+      .day-view-today > span {
+        font-size: 26px;
+      }
+      .day-view-today > span+span {
+        font-size: 14px;
+        line-height: 8px;
+      }
+      .day-view > iron-list {
+        height: calc(100vh - 64px - 64px - 72px - 8px);
+        /*padding-bottom: 64px;*/
       }
       .day-hour {
         position: relative;
@@ -131,6 +143,7 @@
         border-bottom: 1px solid #ddd;
         @apply(--layout-vertical);
       }
+      .day-view-today,
       .week-view-date-each > .today,
       .month-view-weekday-day > span.is-today-idx {
         color: #2196F3;
@@ -145,6 +158,7 @@
         @apply(--layout-flex-auto);
       }
       .week-view-date-hour > iron-list {
+        /*padding-bottom: 64px;*/
         font-size: 12px;
         width: 100%;
       }
