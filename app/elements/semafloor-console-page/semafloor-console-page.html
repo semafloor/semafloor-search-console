@@ -96,8 +96,8 @@
       <div view="month" class="month-view">
         <div class="month-view-weekday">
           <template is="dom-repeat" items="[[_weekdayName]]" index-as="index" strip-whitespace>
-            <div class="month-view-weekday-day">
-              <span class$="[[_isTodayDay(_todayFulldate, _viewFulldate, index)]]">[[item]]</span>
+            <div class$="month-view-weekday-day[[_isTodayDay(_todayFulldate, _viewFulldate, index)]]">
+              <span>[[item]]</span>
             </div>
           </template>
         </div>
@@ -187,6 +187,11 @@
         _floors: Array,
         _rooms: Array,
         _prevFloor: Number,
+        _hasToday: Number,
+        _forceUpdateCls: {
+          type: Boolean,
+          value: false
+        },
         _day: {
           type: Array,
           value: function() {
@@ -326,12 +331,22 @@
       _isTodayCol: function(_hasToday, _compareIdx) {
         return _hasToday === _compareIdx ? ' is-today-col' : '';
       },
-      _isTodayMonth: function(_todayDate, _item) {
-        return _todayDate === _item ? 'is-today-month' : '';
+      _isTodayMonth: function(_todayFulldate, _viewFulldate, _item) {
+        return _todayFulldate.getFullYear() === _viewFulldate.getFullYear() &&
+          _todayFulldate.getMonth() === _viewFulldate.getMonth() &&
+          _todayFulldate.getDate() === _item ? ' is-today-month' : '';
       },
-      _isTodayDay: function(_todayFulldate, _viewFulldate) {
-        return _todayFulldate.getTime() > _viewFulldate.getTime() ? ' yesterday' :
-        _todayFulldate.getTime() === _viewFulldate.getTime() ? ' is-today-idx' : ' tomorrow';
+      _isTodayDay: function(_todayFulldate, _viewFulldate, _idx) {
+        if (_idx >= 0) {
+          return _todayFulldate.getDay() === _idx &&
+            _todayFulldate.getFullYear() === _viewFulldate.getFullYear() &&
+            _todayFulldate.getMonth() === _viewFulldate.getMonth() ?
+            ' is-today-idx' : '';
+        }else {
+          return this._todayFulldate.getTime() > _viewFulldate.getTime() ?
+            ' yesterday' : _todayFulldate.getTime() === _viewFulldate.getTime() ?
+            ' is-today-idx' : ' tomorrow';
+        }
       },
 
       _toggleCollapse: function() {
@@ -373,25 +388,46 @@
         if (_target) {}
         var _selectedView = this.selectedView;
         var _newDate = this._viewFulldate;
+        var _newFulldate = new Date(_newDate.getFullYear(), _newDate.getMonth(),
+        _newDate.getDate() - 1);
+        var _firstDayOfNewWeek;
 
         if (_selectedView === 'day') {
-          // TODO: keep tracking the mutated date is still within the current week.
-          // TODO: keep tracking the mutated date is still within the current month.
-          var _newFulldate = new Date(_newDate.getFullYear(), _newDate.getMonth(),
-          _newDate.getDate() - 1);
+          // update to new week if any.
+          _firstDayOfNewWeek = this._week[1].fulldate;
+          if (_newFulldate < _firstDayOfNewWeek) {
+            this.set('_week', this._updateNewWeek(_newFulldate, true));
+          }
+          // update to new month if any.
+          if (_newDate.getMonth() !== _newFulldate.getMonth()) {
+            this.set('_month', this._updateMonth(_newFulldate.getFullYear(),
+              _newFulldate.getMonth()));
+          }
+          // update to new day if any, however must be placed laat.
           this.set('_viewFulldate', _newFulldate);
         }else if (_selectedView === 'week') {
-          var _lastDayOfCurrentWeek = this._week[1].fulldate;
-          var _firstDayOfNewWeek = new Date(_lastDayOfCurrentWeek.getFullYear(),
-          _lastDayOfCurrentWeek.getMonth(), _lastDayOfCurrentWeek.getDate() - 7);
-          this.set('_week', this._updateNewWeek(_firstDayOfNewWeek));
+          _firstDayOfNewWeek = this._week[1].fulldate;
+          _newFulldate = new Date(_firstDayOfNewWeek.getFullYear(),
+          _firstDayOfNewWeek.getMonth(), _firstDayOfNewWeek.getDate() - 7);
+          // update to new week if any.
+          this.set('_week', this._updateNewWeek(_newFulldate));
+          // update to new month if any.
+          if (_firstDayOfNewWeek.getMonth() !== _newFulldate.getMonth()) {
+            this.set('_month', this._updateMonth(_newFulldate.getFullYear(),
+              _newFulldate.getMonth()));
+          }
+          // update to new day if any, however must be placed laat.
+          this.set('_viewFulldate', _newFulldate);
         }else {
+          _newFulldate = new Date(_newDate.getFullYear(), _newDate.getMonth() - 1, 1);
+          // update to new month if any.
           this.set('_month',
             this._updateMonth(_newDate.getFullYear(), _newDate.getMonth() - 1));
           // update _viewFulldate after each month changes.
           // now I know why Google set it to 1 (first day of month).
-          this.set('_viewFulldate', new Date(_newDate.getFullYear(),
-            _newDate.getMonth() - 1, 1));
+          this.set('_week', this._updateNewWeek(_newFulldate, true));
+          // always set _viewFulldate last as _updateNewWeek might change it.
+          this.set('_viewFulldate', _newFulldate);
         }
         console.timeEnd('func-prev-day-week-month');
       },
@@ -402,30 +438,49 @@
         if (_target) {}
         var _selectedView = this.selectedView;
         var _newDate = this._viewFulldate;
+        var _lastDayOfCurrentWeek;
+        var _firstDayOfNewWeek;
         var _newFulldate = new Date(_newDate.getFullYear(), _newDate.getMonth(),
           _newDate.getDate() + 1);
 
         if (_selectedView === 'day') {
-          // TODO: keep tracking the mutated date is still within the current week.
-          // TODO: keep tracking the mutated date is still within the current month.
+          // update to new week if any.
+          _lastDayOfCurrentWeek = _.last(this._week).fulldate;
+          if (_newFulldate > _lastDayOfCurrentWeek) {
+            this.set('_week', this._updateNewWeek(_newFulldate));
+          }
+          // update to new month if any.
+          if (_newDate.getMonth() !== _newFulldate.getMonth()) {
+            this.set('_month', this._updateMonth(_newFulldate.getFullYear(),
+              _newFulldate.getMonth()));
+          }
+          // update to new day if any, however must be placed laat.
           this.set('_viewFulldate', _newFulldate);
         }else if (_selectedView === 'week') {
-          // TODO: keep tracking the mutated date is still within the current week.
           // TODO: keep tracking the mutated date is still within the current month.
-          var _lastDayOfCurrentWeek = _.last(this._week).fulldate;
-          var _firstDayOfNewWeek = new Date(_lastDayOfCurrentWeek.getFullYear(),
+          _firstDayOfNewWeek = this._week[1].fulldate;
+          _lastDayOfCurrentWeek = _.last(this._week).fulldate;
+          _newFulldate = new Date(_lastDayOfCurrentWeek.getFullYear(),
           _lastDayOfCurrentWeek.getMonth(), _lastDayOfCurrentWeek.getDate() + 1);
-          this.set('_week', this._updateNewWeek(_firstDayOfNewWeek));
+          // update to new week if any.
+          this.set('_week', this._updateNewWeek(_newFulldate));
+          // update to new month if any.
+          if (_newFulldate.getMonth() !== _firstDayOfNewWeek.getMonth()) {
+            this.set('_month', this._updateMonth(_newFulldate.getFullYear(),
+              _newFulldate.getMonth()));
+          }
+          // update to new day if any, however must be placed laat.
+          this.set('_viewFulldate', _newFulldate);
         }else {
-          // TODO: seems like day has been updated automatically due to being reset.
-          // TODO: update to display first week of month on week view.
+          _newFulldate = new Date(_newDate.getFullYear(), _newDate.getMonth() + 1, 1);
+          // update to new month if any.
           this.set('_month',
-          this._updateMonth(_newDate.getFullYear(), _newDate.getMonth() + 1));
+            this._updateMonth(_newFulldate.getFullYear(), _newFulldate.getMonth()));
           // update _viewFulldate after each month changes.
           // now I know why Google set it to 1 (first day of month).
-          this.set('_viewFulldate', new Date(_newDate.getFullYear(),
-          _newDate.getMonth() + 1, 1));
-
+          this.set('_week', this._updateNewWeek(_newFulldate, true));
+          // always set _viewFulldate last as _updateNewWeek might change it.
+          this.set('_viewFulldate', _newFulldate);
         }
         console.timeEnd('func-next-day-week-month');
       },
@@ -433,18 +488,19 @@
       goToday: function() {
         console.time('func-go-today');
         var _today = new Date();
+        // var _viewFulldate = this._viewFulldate;
+        // reset week view.
+        this.set('_week', this._updateNewWeek(_today, true));
+        // reset month view.
+        this.set('_month', this._updateMonth(_today.getFullYear(), _today.getMonth()));
         // reset day view.
         this.set('_viewFulldate', new Date(_today.getFullYear(), _today.getMonth(),
-          _today.getDate()));
-        // reset month view.
-        var _viewFulldate = this._viewFulldate;
-        var _offset = _viewFulldate.getDate() - _viewFulldate.getDay();
-        this.set('_week', this._updateNewWeek(new Date(_viewFulldate.getFullYear(),
-          _viewFulldate.getMonth(), _offset)));
+        _today.getDate()));
         console.timeEnd('func-go-today');
       },
 
-      _updateNewWeek: function(_firstDayOfNewWeek) {
+      _updateNewWeek: function(_firstDayOfNewWeek, _offset) {
+        console.time('func-update-new-week');
         var _week = [' '];
         var _firstDate = _firstDayOfNewWeek.getDate();
         var _firstMonth = _firstDayOfNewWeek.getMonth();
@@ -454,6 +510,11 @@
         var _isToday;
         var _hasToday = 8;
         _today = new Date(_today.getFullYear(), _today.getMonth(), _today.getDate());
+
+        if (_offset) {
+          _firstDate = _firstDate - _firstDayOfNewWeek.getDay();
+        }
+
         for (var i = 0; i < 7; i++) {
           _new = new Date(_firstFullYear, _firstMonth, _firstDate + i);
           _isToday = _new.getTime() < _today.getTime() ? 'yesterday' :
@@ -469,6 +530,7 @@
           });
         }
         this.set('_hasToday', _hasToday);
+        console.timeEnd('func-update-new-week');
         return _week;
       },
 
@@ -477,7 +539,7 @@
         function _computeTotalDays(_fullyear, _month) {
           console.time('func-update-month-compute-total-days');
           var _total = 31;
-          if (_month === 1) {
+          if (_month === 2) {
             _total = new Date(_fullyear, 1, 29).getMonth() === 1 ? 29 : 28;
           }else if (_month === 4 || _month === 6 || _month === 9 || _month === 11) {
             _total = 30;
