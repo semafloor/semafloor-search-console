@@ -9,11 +9,12 @@
   function finishLazyLoading() {
     // HTML Import's link element.
     var link = document.querySelector('#bundle');
+    // window.Polymer = window.Polymer || {dom: 'shadow'};
 
     // 6. Remove skeleton.
     function onImportLoaded() {
-      // var skeleton = document.getElementById('skeleton');
-      // skeleton.remove();
+      var skeleton = document.getElementById('skeleton');
+      skeleton.remove();
 
       console.log('Elements are upgraded!');
     }
@@ -92,17 +93,13 @@
     console.log('Cant\'t find: ' +
     window.location.href +
     '. Redirected you to Home Page');
-    page.redirect('/profile/list');
+    page.redirect('/home/list');
   });
 
+  // page();
   page({
     hashbang: true
   });
-  // add #! before urls
-  // try {
-  // } catch (e) {
-  //   console.log(e);
-  // }
 
   // app.displayInstalledToast = function() {
   //   // Check to make sure caching is actually enabled—it won't be in the dev environment.
@@ -110,13 +107,8 @@
   //     document.querySelector('#caching-complete').show();
   //   }
   // };
-  // app.addEventListener('dom-change', function() {
-  //   console.log('Our app is ready to rock!');
-  // });
-  //
-  // // See https://github.com/Polymer/polymer/issues/1381
-  // window.addEventListener('WebComponentsReady', function() {
-  //   // imports are loaded and elements have been registered
-  // });
+  blog.addEventListener('dom-change', function() {
+    console.log('Our app is ready to rock!');
+  });
 
 })(document);

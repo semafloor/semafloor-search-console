@@ -1,5 +1,5 @@
 {
-  "firebase": "semafloor-webapp",
+  "firebase": "semafloor-console",
   "public": "dist",
   "ignore": [
     "firebase.json",

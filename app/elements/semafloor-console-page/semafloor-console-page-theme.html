@@ -178,19 +178,17 @@
         color: #424242;
         position: absolute;
       }
-      .week-view-day-hour-row {
-        margin-left: calc(100% / 8 - 1px);
-        position: relative;
-        min-height: 64px;
-        width: 100%;
+      .week-view-day-hour > span+div {
         border-left: 1px solid #ddd;
-        border-bottom: 1px solid #ddd;
-        @apply(--layout-horizontal);
+        width: calc(100% / 8 + 1px)
       }
       .week-view-day-hour-item {
-        width: calc(100% / 7);
+        width: calc(100% / 8);
         padding-left: 8px;
+        position: relative;
         border-right: 1px solid #ddd;
+        border-bottom: 1px solid #ddd;
+        left: calc(100% / 8 - 1px);
       }
       .week-view-day-hour-item.is-today-col {
         background-color: #eee;

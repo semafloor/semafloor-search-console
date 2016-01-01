@@ -19,7 +19,7 @@
     <div class="selection-menu">
       <paper-icon-button icon="icons:chevron-left" on-tap="_prevDayWeekMonth"></paper-icon-button>
       <paper-button class="" on-tap="_toggleCollapse">
-        <span>[[_selectedRoomName]]</span>
+        [[_selectedRoomName]]
         <iron-icon id="menuDropDown" class="menu-drop-down" icon="icons:arrow-drop-down"></iron-icon>
       </paper-button>
       <paper-icon-button icon="icons:chevron-right" on-tap="_nextDayWeekMonth"></paper-icon-button>
@@ -41,6 +41,7 @@
         </template>
       </paper-tabs>
     </iron-collapse>
+
     <iron-pages id="viewPages" selected="[[selectedView]]" attr-for-selected="view"
       class="view-pages">
       <!-- <div view="loading" class="loading-view">
@@ -61,6 +62,7 @@
           </template>
         </iron-list>
       </div>
+
       <div view="week" class="week-view">
         <div class="week-view-date">
           <template is="dom-repeat" items="[[_week]]" index-as="index" strip-whitespace>
@@ -74,30 +76,26 @@
           <iron-list items="[[_day]]">
             <template strip-whitespace>
               <div class="week-view-day-hour">
-                <div class="">
-                  <span class="week-view-day-hour-label">[[item]]</span>
-                </div>
+                <span class="week-view-day-hour-label">[[item]]</span>
+                <div class$="week-view-day-hour-item[[_isTodayCol(_hasToday, 0)]]" day="sun">[[item]]</div>
+                <div class$="week-view-day-hour-item[[_isTodayCol(_hasToday, 1)]]" day="mon">[[item]]</div>
+                <div class$="week-view-day-hour-item[[_isTodayCol(_hasToday, 2)]]" day="tue">[[item]]</div>
+                <div class$="week-view-day-hour-item[[_isTodayCol(_hasToday, 3)]]" day="wed">[[item]]</div>
 
-                <div class="week-view-day-hour-row">
-                  <div class$="week-view-day-hour-item[[_isTodayCol(_hasToday, 0)]]" day="sun">[[item]]</div>
-                  <div class$="week-view-day-hour-item[[_isTodayCol(_hasToday, 1)]]" day="mon">[[item]]</div>
-                  <div class$="week-view-day-hour-item[[_isTodayCol(_hasToday, 2)]]" day="tue">[[item]]</div>
-                  <div class$="week-view-day-hour-item[[_isTodayCol(_hasToday, 3)]]" day="wed">[[item]]</div>
-
-                  <div class$="week-view-day-hour-item[[_isTodayCol(_hasToday, 4)]]" day="thu">[[item]]</div>
-                  <div class$="week-view-day-hour-item[[_isTodayCol(_hasToday, 5)]]" day="fri">[[item]]</div>
-                  <div class$="week-view-day-hour-item[[_isTodayCol(_hasToday, 6)]]" day="sat">[[item]]</div>
-                </div>
+                <div class$="week-view-day-hour-item[[_isTodayCol(_hasToday, 4)]]" day="thu">[[item]]</div>
+                <div class$="week-view-day-hour-item[[_isTodayCol(_hasToday, 5)]]" day="fri">[[item]]</div>
+                <div class$="week-view-day-hour-item[[_isTodayCol(_hasToday, 6)]]" day="sat">[[item]]</div>
               </div>
             </template>
           </iron-list>
         </div>
       </div>
+
       <div view="month" class="month-view">
         <div class="month-view-weekday">
           <template is="dom-repeat" items="[[_weekdayName]]" index-as="index" strip-whitespace>
             <div class$="month-view-weekday-day[[_isTodayDay(_todayFulldate, _viewFulldate, index)]]">
-              <span>[[item]]</span>
+              [[item]]
             </div>
           </template>
         </div>
@@ -163,7 +161,7 @@
       properties: {
         selectedView: {
           type: String,
-          value: 'day'
+          value: 'month'
         },
         site: {
           type: Number,

@@ -11,6 +11,7 @@
 <link rel="import" href="../../bower_components/paper-item/paper-item.html">
 <link rel="import" href="../../bower_components/paper-card/paper-card.html">
 <link rel="import" href="../../bower_components/paper-menu/paper-menu.html">
+<link rel="import" href="../../bower_components/paper-fab/paper-fab.html">
 
 <link rel="import" href="../../bower_components/app-layout/app-layout.html">
 <link rel="import" href="../../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
@@ -22,15 +23,9 @@
     <app-drawer-layout>
       <app-header-layout drawer has-scrolling-region>
         <app-header class="drawer-header">
-          <app-toolbar class="drawer-top-toolbar">
-            <div class="profile-pic">
-
-            </div>
-          </app-toolbar>
-          <app-toolbar class="drawer-bottom-toolbar">
-            <div class="profile-name">John Doe</div>
-            <div class="profile-email">johndoe@jmail.com</div>
-          </app-toolbar>
+          <div class="profile-pic"></div>
+          <div class="profile-name">John Doe</div>
+          <div class="profile-email">johndoe@jmail.com</div>
         </app-header>
 
         <iron-selector class="nav-menu" selected="[[category]]" attr-for-selected="name">
@@ -82,19 +77,21 @@
               </div>
             </paper-card>
           </div>
-          <!-- 167 on OP/ CH w/o all these -->
-          <!-- 179 on FF w/o all these -->
+          <!-- 166 on OP/ CH w/o all these -->
+          <!-- 178 on FF w/o all these -->
           <!-- NO! 933 nodes on OP/ CH -->
           <!-- NO! 933 nodes on FF -->
-          <!-- 911 nodes after optimzation of itself on OP/ CH -->
-          <!-- 911 nodes after optimzation of itself on FF -->
+          <!-- 971 nodes after optimzation of itself on OP/ CH -->
+          <!-- 971 nodes after optimzation of itself on FF -->
           <semafloor-search-page name="search"></semafloor-search-page>
           <!-- 400 nodes on OP/ CH -->
           <!-- 403 nodes on FF -->
-          <!-- 358 nodes after optimization of semafloor-search-page on OP/ CH -->
-          <!-- 358 nodes after optimization of semafloor-search-page on FF -->
+          <!-- 344 nodes after optimization of semafloor-search-page on OP/ CH -->
+          <!-- 344 nodes after optimization of semafloor-search-page on FF -->
           <semafloor-console-page id="consolePage" name="console" selected-view="[[view]]"></semafloor-console-page>
         </iron-pages>
+
+        <paper-fab id="fabulous" icon="icons:create" hidden$="[[!_isHome(category)]]"></paper-fab>
       </app-header-layout>
     </app-drawer-layout>
   </template>
@@ -121,12 +118,16 @@
       _onAppHeaderTransform: function(ev) {
         this.toggleClass('shrink-change-color', ev.detail.progress > 0.5, this.$.topToolbar);
         this.toggleClass('shrink-change-color', ev.detail.progress > 0.5, this.$.titleToolbar);
+        this.toggleClass('scroll-to-hide', ev.detail.progress > 0.5, this.$.fabulous);
       },
 
       _isConsole: function(_category) {
         // workaround: to reset the position of topToolbar when switches to console page.
         this.transform('translate3d(0px, 0px, 0px)', this.$.topToolbar);
         return _category === 'console';
+      },
+      _isHome: function(_category) {
+        return _category === 'home';
       },
 
       _goToday: function(ev) {
